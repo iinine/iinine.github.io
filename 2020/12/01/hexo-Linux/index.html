@@ -28,18 +28,18 @@
 <meta name="description" content="本博基于 ubuntu18.04+git_v2.17.1+NodeJS_v8.10.0+hexo_v3.9.0 不同平台和版本实际操作可能略不同。">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux下搭建Hexo个人博客">
-<meta property="og:url" content="https://iinine.github.io/2020/12/03/hexo-Linux/index.html">
+<meta property="og:url" content="https://iinine.github.io/2020/12/01/hexo-Linux/index.html">
 <meta property="og:site_name" content="三分地">
 <meta property="og:description" content="本博基于 ubuntu18.04+git_v2.17.1+NodeJS_v8.10.0+hexo_v3.9.0 不同平台和版本实际操作可能略不同。">
 <meta property="og:locale" content="zh_CN">
-<meta property="article:published_time" content="2020-12-03T06:57:03.000Z">
-<meta property="article:modified_time" content="2020-12-04T09:51:28.128Z">
-<meta property="article:tag" content="Hexo">
+<meta property="article:published_time" content="2020-12-01T06:57:03.000Z">
+<meta property="article:modified_time" content="2020-12-04T10:41:43.922Z">
 <meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Hexo">
 <meta name="twitter:card" content="summary">
 
 
-<link rel="canonical" href="https://iinine.github.io/2020/12/03/hexo-Linux/">
+<link rel="canonical" href="https://iinine.github.io/2020/12/01/hexo-Linux/">
 
 
 <script data-pjax class="page-configurations">
@@ -177,7 +177,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <section class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96"><span class="nav-number">1.</span> <span class="nav-text">安装依赖</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85hexo"><span class="nav-number">2.</span> <span class="nav-text">安装hexo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A7%E8%A1%8Cinit%E5%91%BD%E4%BB%A4%E5%88%9D%E5%A7%8B%E5%8C%96hexo-%E7%94%9F%E6%88%90blog%E6%96%87%E4%BB%B6%EF%BC%8C%E5%B0%B1%E6%98%AF%E4%BD%A0%E7%9A%84%E5%8D%9A%E5%AE%A2%E6%A0%B9%E7%9B%AE%E5%BD%95%EF%BC%8C%E6%89%80%E6%9C%89%E7%9A%84%E6%93%8D%E4%BD%9C%E9%83%BD%E5%9C%A8%E9%87%8C%E9%9D%A2%E8%BF%9B%E8%A1%8C%E3%80%82"><span class="nav-number">3.</span> <span class="nav-text">执行init命令初始化hexo,生成blog文件，就是你的博客根目录，所有的操作都在里面进行。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E9%9D%99%E6%80%81%E7%BD%91%E9%A1%B5"><span class="nav-number">4.</span> <span class="nav-text">生成静态网页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E6%9C%AC%E5%9C%B0%E6%9C%8D%E5%8A%A1%EF%BC%8C%E8%BF%9B%E8%A1%8C%E6%96%87%E7%AB%A0%E9%A2%84%E8%A7%88%E8%B0%83%E8%AF%95"><span class="nav-number">5.</span> <span class="nav-text">启动本地服务，进行文章预览调试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEGitHub"><span class="nav-number"></span> <span class="nav-text">配置GitHub</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GitHub%E9%A1%B5%E9%9D%A2%E5%BB%BA%E7%AB%8B%E4%B8%8E%E4%BD%A0%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%B9%E5%BA%94%E7%9A%84%E4%BB%93%E5%BA%93%EF%BC%8C%E4%BB%93%E5%BA%93%E5%90%8D%E5%BF%85%E9%A1%BB%E4%B8%BA-yourname-github-io-%EF%BC%8C%E5%9B%BA%E5%AE%9A%E5%86%99%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">GitHub页面建立与你用户名对应的仓库，仓库名必须为 yourname.github.io ，固定写法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E5%85%B3%E8%81%94-bash-vi-users-blog-config-yml"><span class="nav-number">2.</span> <span class="nav-text">建立关联 bash vi &#x2F;users&#x2F;blog&#x2F;_config.yml</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%EF%BC%9A-bashnpm-install-save-hexo-deployer-git"><span class="nav-number">3.</span> <span class="nav-text">执行命令： bashnpm install --save hexo-deployer-git</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%84%B6%E5%90%8E%EF%BC%8C%E6%89%A7%E8%A1%8C%E9%85%8D%E7%BD%AE%E5%91%BD%E4%BB%A4%EF%BC%9Ahexo-deploy"><span class="nav-number">4.</span> <span class="nav-text">然后，执行配置命令：hexo deploy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%8F%E6%AC%A1%E9%83%A8%E7%BD%B2%E5%91%BD%E4%BB%A4"><span class="nav-number">5.</span> <span class="nav-text">每次部署命令:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E8%87%AA%E5%B7%B1%E7%9A%84%E5%9F%9F%E5%90%8D"><span class="nav-number"></span> <span class="nav-text">配置自己的域名</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A6%96%E5%85%88%E8%AE%BE%E7%BD%AE%E5%9F%9F%E5%90%8DDNS%E8%A7%A3%E6%9E%90%EF%BC%8CType-%E6%94%B9%E6%88%90-CNAME-Target-%E5%A1%AB%E4%B8%8A-yourname-github-io-%E4%BF%9D%E5%AD%98"><span class="nav-number">1.</span> <span class="nav-text">首先设置域名DNS解析，Type 改成 CNAME, Target 填上 yourname.github.io, 保存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8-source-%E4%B8%8B%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%90%8D%E4%B8%BA-CNAME-%E7%9A%84%E6%96%87%E4%BB%B6%EF%BC%8C%E5%86%85%E5%AE%B9%E4%B8%BA%E4%BD%A0%E8%A6%81%E4%BD%BF%E7%94%A8%E7%9A%84%E5%9F%9F%E5%90%8D%EF%BC%8C%E5%A6%82%E6%9C%AC%E5%8D%9A%E5%AE%A2%E4%B8%BA-www-starts-sh"><span class="nav-number">2.</span> <span class="nav-text">在 source 下创建一个名为 CNAME 的文件，内容为你要使用的域名，如本博客为 www.starts.sh</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%BE%91-config-yml%EF%BC%8C%E4%BD%BF-url-%E7%9A%84%E5%86%85%E5%AE%B9%E4%B8%BA%E4%BD%A0%E7%9A%84%E4%B8%BB%E9%A1%B5%E5%9C%B0%E5%9D%80%EF%BC%8C%E5%A6%82%E6%9C%AC%E5%8D%9A%E5%AE%A2%E4%B8%BA-https-www-starts-sh"><span class="nav-number">3.</span> <span class="nav-text">编辑 _config.yml，使 url 的内容为你的主页地址，如本博客为 https:&#x2F;&#x2F;www.starts.sh</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E5%88%B0-git-%E5%90%8E%EF%BC%8C%E8%BF%9B%E5%85%A5-github%EF%BC%8C%E6%89%93%E5%BC%80%E7%BD%91%E7%AB%99%E6%89%80%E5%9C%A8%E9%A1%B9%E7%9B%AE%EF%BC%8C%E7%82%B9%E5%87%BB-Settings-GitHub-Pages-%E5%8B%BE%E9%80%89-Enforce-HTTPS"><span class="nav-number">4.</span> <span class="nav-text">部署到 git 后，进入 github，打开网站所在项目，点击 Settings&#x2F;GitHub Pages ,勾选 Enforce HTTPS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number"></span> <span class="nav-text">常用命令</span></a></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96"><span class="nav-number">1.</span> <span class="nav-text">安装依赖</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85hexo"><span class="nav-number">1.1.</span> <span class="nav-text">安装hexo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A7%E8%A1%8Cinit%E5%91%BD%E4%BB%A4%E5%88%9D%E5%A7%8B%E5%8C%96hexo-%E7%94%9F%E6%88%90blog%E6%96%87%E4%BB%B6%EF%BC%8C%E5%B0%B1%E6%98%AF%E4%BD%A0%E7%9A%84%E5%8D%9A%E5%AE%A2%E6%A0%B9%E7%9B%AE%E5%BD%95%EF%BC%8C%E6%89%80%E6%9C%89%E7%9A%84%E6%93%8D%E4%BD%9C%E9%83%BD%E5%9C%A8%E9%87%8C%E9%9D%A2%E8%BF%9B%E8%A1%8C%E3%80%82"><span class="nav-number">1.2.</span> <span class="nav-text">执行init命令初始化hexo,生成blog文件，就是你的博客根目录，所有的操作都在里面进行。</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%94%9F%E6%88%90%E9%9D%99%E6%80%81%E7%BD%91%E9%A1%B5"><span class="nav-number">1.3.</span> <span class="nav-text">生成静态网页</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%90%AF%E5%8A%A8%E6%9C%AC%E5%9C%B0%E6%9C%8D%E5%8A%A1%EF%BC%8C%E8%BF%9B%E8%A1%8C%E6%96%87%E7%AB%A0%E9%A2%84%E8%A7%88%E8%B0%83%E8%AF%95"><span class="nav-number">1.4.</span> <span class="nav-text">启动本地服务，进行文章预览调试</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AEGitHub"><span class="nav-number">2.</span> <span class="nav-text">配置GitHub</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#GitHub%E9%A1%B5%E9%9D%A2%E5%BB%BA%E7%AB%8B%E4%B8%8E%E4%BD%A0%E7%94%A8%E6%88%B7%E5%90%8D%E5%AF%B9%E5%BA%94%E7%9A%84%E4%BB%93%E5%BA%93%EF%BC%8C%E4%BB%93%E5%BA%93%E5%90%8D%E5%BF%85%E9%A1%BB%E4%B8%BA-yourname-github-io-%EF%BC%8C%E5%9B%BA%E5%AE%9A%E5%86%99%E6%B3%95"><span class="nav-number">2.1.</span> <span class="nav-text">GitHub页面建立与你用户名对应的仓库，仓库名必须为 yourname.github.io ，固定写法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BB%BA%E7%AB%8B%E5%85%B3%E8%81%94-bash-vi-users-blog-config-yml"><span class="nav-number">2.2.</span> <span class="nav-text">建立关联 bash vi &#x2F;users&#x2F;blog&#x2F;_config.yml</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%89%A7%E8%A1%8C%E5%91%BD%E4%BB%A4%EF%BC%9A-bashnpm-install-save-hexo-deployer-git"><span class="nav-number">2.3.</span> <span class="nav-text">执行命令： bashnpm install --save hexo-deployer-git</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%84%B6%E5%90%8E%EF%BC%8C%E6%89%A7%E8%A1%8C%E9%85%8D%E7%BD%AE%E5%91%BD%E4%BB%A4%EF%BC%9Ahexo-deploy"><span class="nav-number">2.4.</span> <span class="nav-text">然后，执行配置命令：hexo deploy</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%8F%E6%AC%A1%E9%83%A8%E7%BD%B2%E5%91%BD%E4%BB%A4"><span class="nav-number">2.5.</span> <span class="nav-text">每次部署命令:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AE%E8%87%AA%E5%B7%B1%E7%9A%84%E5%9F%9F%E5%90%8D"><span class="nav-number">3.</span> <span class="nav-text">配置自己的域名</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A6%96%E5%85%88%E8%AE%BE%E7%BD%AE%E5%9F%9F%E5%90%8DDNS%E8%A7%A3%E6%9E%90%EF%BC%8CType-%E6%94%B9%E6%88%90-CNAME-Target-%E5%A1%AB%E4%B8%8A-yourname-github-io-%E4%BF%9D%E5%AD%98"><span class="nav-number">3.1.</span> <span class="nav-text">首先设置域名DNS解析，Type 改成 CNAME, Target 填上 yourname.github.io, 保存</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9C%A8-source-%E4%B8%8B%E5%88%9B%E5%BB%BA%E4%B8%80%E4%B8%AA%E5%90%8D%E4%B8%BA-CNAME-%E7%9A%84%E6%96%87%E4%BB%B6%EF%BC%8C%E5%86%85%E5%AE%B9%E4%B8%BA%E4%BD%A0%E8%A6%81%E4%BD%BF%E7%94%A8%E7%9A%84%E5%9F%9F%E5%90%8D%EF%BC%8C%E5%A6%82%E6%9C%AC%E5%8D%9A%E5%AE%A2%E4%B8%BA-iinine-github-io"><span class="nav-number">3.2.</span> <span class="nav-text">在 source 下创建一个名为 CNAME 的文件，内容为你要使用的域名，如本博客为 iinine.github.io</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%96%E8%BE%91-config-yml%EF%BC%8C%E4%BD%BF-url-%E7%9A%84%E5%86%85%E5%AE%B9%E4%B8%BA%E4%BD%A0%E7%9A%84%E4%B8%BB%E9%A1%B5%E5%9C%B0%E5%9D%80%EF%BC%8C%E5%A6%82%E6%9C%AC%E5%8D%9A%E5%AE%A2%E4%B8%BA-https-iinine-github-io"><span class="nav-number">3.3.</span> <span class="nav-text">编辑 _config.yml，使 url 的内容为你的主页地址，如本博客为 https:&#x2F;&#x2F;iinine.github.io</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%83%A8%E7%BD%B2%E5%88%B0-git-%E5%90%8E%EF%BC%8C%E8%BF%9B%E5%85%A5-github%EF%BC%8C%E6%89%93%E5%BC%80%E7%BD%91%E7%AB%99%E6%89%80%E5%9C%A8%E9%A1%B9%E7%9B%AE%EF%BC%8C%E7%82%B9%E5%87%BB-Settings-GitHub-Pages-%E5%8B%BE%E9%80%89-Enforce-HTTPS"><span class="nav-number">3.4.</span> <span class="nav-text">部署到 git 后，进入 github，打开网站所在项目，点击 Settings&#x2F;GitHub Pages ,勾选 Enforce HTTPS</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="nav-number">4.</span> <span class="nav-text">常用命令</span></a></li></ol></div>
         </section>
         <!--/noindex-->
 
@@ -254,7 +254,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://iinine.github.io/2020/12/03/hexo-Linux/">
+    <link itemprop="mainEntityOfPage" href="https://iinine.github.io/2020/12/01/hexo-Linux/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.jpg">
@@ -278,14 +278,14 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2020-12-03 14:57:03" itemprop="dateCreated datePublished" datetime="2020-12-03T14:57:03+08:00">2020-12-03</time>
+      <time title="创建时间：2020-12-01 14:57:03" itemprop="dateCreated datePublished" datetime="2020-12-01T14:57:03+08:00">2020-12-01</time>
     </span>
       <span class="post-meta-item">
         <span class="post-meta-item-icon">
           <i class="far fa-calendar-check"></i>
         </span>
         <span class="post-meta-item-text">更新于</span>
-        <time title="修改时间：2020-12-04 17:51:28" itemprop="dateModified" datetime="2020-12-04T17:51:28+08:00">2020-12-04</time>
+        <time title="修改时间：2020-12-04 18:41:43" itemprop="dateModified" datetime="2020-12-04T18:41:43+08:00">2020-12-04</time>
       </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -309,7 +309,7 @@
     <div class="post-body" itemprop="articleBody">
         <p>本博基于 ubuntu18.04+git_v2.17.1+NodeJS_v8.10.0+hexo_v3.9.0 不同平台和版本实际操作可能略不同。<a id="more"></a></p>
 <p>准备工作</p>
-<h3 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h3><p>安装Git</p>
+<h2 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h2><p>安装Git</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install git</span><br></pre></td></tr></table></figure>
 <p>安装npm</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install npm</span><br></pre></td></tr></table></figure>
@@ -327,28 +327,25 @@
 <h3 id="执行命令：-bashnpm-install-save-hexo-deployer-git"><a href="#执行命令：-bashnpm-install-save-hexo-deployer-git" class="headerlink" title="执行命令： bashnpm install --save hexo-deployer-git"></a>执行命令：<code> bashnpm install --save hexo-deployer-git</code></h3><h3 id="然后，执行配置命令：hexo-deploy"><a href="#然后，执行配置命令：hexo-deploy" class="headerlink" title="然后，执行配置命令：hexo deploy"></a>然后，执行配置命令：hexo deploy</h3><p>在浏览器中输入 <a target="_blank" rel="noopener" href="http://yourname.github.io/">http://yourname.github.io/</a></p>
 <h3 id="每次部署命令"><a href="#每次部署命令" class="headerlink" title="每次部署命令:"></a>每次部署命令:</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> blog</span><br><span class="line"></span><br><span class="line">hexo g -d</span><br></pre></td></tr></table></figure>
 
-<h2 id="配置自己的域名"><a href="#配置自己的域名" class="headerlink" title="配置自己的域名"></a>配置自己的域名</h2><h3 id="首先设置域名DNS解析，Type-改成-CNAME-Target-填上-yourname-github-io-保存"><a href="#首先设置域名DNS解析，Type-改成-CNAME-Target-填上-yourname-github-io-保存" class="headerlink" title="首先设置域名DNS解析，Type 改成 CNAME, Target 填上 yourname.github.io, 保存"></a>首先设置域名DNS解析，Type 改成 CNAME, Target 填上 yourname.github.io, 保存</h3><h3 id="在-source-下创建一个名为-CNAME-的文件，内容为你要使用的域名，如本博客为-www-starts-sh"><a href="#在-source-下创建一个名为-CNAME-的文件，内容为你要使用的域名，如本博客为-www-starts-sh" class="headerlink" title="在 source 下创建一个名为 CNAME 的文件，内容为你要使用的域名，如本博客为 www.starts.sh"></a>在 source 下创建一个名为 CNAME 的文件，内容为你要使用的域名，如本博客为 <a target="_blank" rel="noopener" href="http://www.starts.sh/">www.starts.sh</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> blog/<span class="built_in">source</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;www.starts.sh&quot;</span> &gt; CNAME</span><br></pre></td></tr></table></figure>
+<h2 id="配置自己的域名"><a href="#配置自己的域名" class="headerlink" title="配置自己的域名"></a>配置自己的域名</h2><h3 id="首先设置域名DNS解析，Type-改成-CNAME-Target-填上-yourname-github-io-保存"><a href="#首先设置域名DNS解析，Type-改成-CNAME-Target-填上-yourname-github-io-保存" class="headerlink" title="首先设置域名DNS解析，Type 改成 CNAME, Target 填上 yourname.github.io, 保存"></a>首先设置域名DNS解析，Type 改成 CNAME, Target 填上 yourname.github.io, 保存</h3><h3 id="在-source-下创建一个名为-CNAME-的文件，内容为你要使用的域名，如本博客为-iinine-github-io"><a href="#在-source-下创建一个名为-CNAME-的文件，内容为你要使用的域名，如本博客为-iinine-github-io" class="headerlink" title="在 source 下创建一个名为 CNAME 的文件，内容为你要使用的域名，如本博客为 iinine.github.io"></a>在 source 下创建一个名为 CNAME 的文件，内容为你要使用的域名，如本博客为 iinine.github.io</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> blog/<span class="built_in">source</span></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;iinine.github.io&quot;</span> &gt; CNAME</span><br></pre></td></tr></table></figure>
 
-<h3 id="编辑-config-yml，使-url-的内容为你的主页地址，如本博客为-https-www-starts-sh"><a href="#编辑-config-yml，使-url-的内容为你的主页地址，如本博客为-https-www-starts-sh" class="headerlink" title="编辑 _config.yml，使 url 的内容为你的主页地址，如本博客为 https://www.starts.sh"></a>编辑 _config.yml，使 url 的内容为你的主页地址，如本博客为 <a target="_blank" rel="noopener" href="https://www.starts.sh/">https://www.starts.sh</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vi /users/blog/_config.yml</span><br><span class="line"></span><br><span class="line">url: https://www.starts.sh</span><br></pre></td></tr></table></figure>
-<h3 id="部署到-git-后，进入-github，打开网站所在项目，点击-Settings-GitHub-Pages-勾选-Enforce-HTTPS"><a href="#部署到-git-后，进入-github，打开网站所在项目，点击-Settings-GitHub-Pages-勾选-Enforce-HTTPS" class="headerlink" title="部署到 git 后，进入 github，打开网站所在项目，点击 Settings/GitHub Pages ,勾选 Enforce HTTPS"></a>部署到 git 后，进入 github，打开网站所在项目，点击 Settings/GitHub Pages ,勾选 Enforce HTTPS</h3><h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><pre><code class="bash">hexo new&quot;postname&quot; ```新建文章
-``` bash
-hexo new page&quot;pagename&quot; ```新建页面
-``` bash
-hexo clean ```清理缓存
-``` bash
-hexo generate ```生成静态页面
-``` bash
-hexo server ```开启预览访问端口
-``` bash
-hexo deploy ```将.deploy目录部署到GitHub
-
-博客文章在 /blog/source/_posts 文章支持Markdown语法。如果想修改头像可以直接在主题的 _config.yml 文件里面修改，友情链接，之类的都在这里。
-
-上面的是Linux搭建方法，相信大家用Windows的比较多。推荐朋友的Windows搭建教程
-
-– END –
-
-</code></pre>
+<h3 id="编辑-config-yml，使-url-的内容为你的主页地址，如本博客为-https-iinine-github-io"><a href="#编辑-config-yml，使-url-的内容为你的主页地址，如本博客为-https-iinine-github-io" class="headerlink" title="编辑 _config.yml，使 url 的内容为你的主页地址，如本博客为 https://iinine.github.io"></a>编辑 _config.yml，使 url 的内容为你的主页地址，如本博客为 <a href="https://iinine.github.io/">https://iinine.github.io</a></h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">vi /users/blog/_config.yml</span><br><span class="line"></span><br><span class="line">url: https://iinine.github.io</span><br></pre></td></tr></table></figure>
+<h3 id="部署到-git-后，进入-github，打开网站所在项目，点击-Settings-GitHub-Pages-勾选-Enforce-HTTPS"><a href="#部署到-git-后，进入-github，打开网站所在项目，点击-Settings-GitHub-Pages-勾选-Enforce-HTTPS" class="headerlink" title="部署到 git 后，进入 github，打开网站所在项目，点击 Settings/GitHub Pages ,勾选 Enforce HTTPS"></a>部署到 git 后，进入 github，打开网站所在项目，点击 Settings/GitHub Pages ,勾选 Enforce HTTPS</h3><h2 id="常用命令"><a href="#常用命令" class="headerlink" title="常用命令"></a>常用命令</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new<span class="string">&quot;postname&quot;</span> </span><br></pre></td></tr></table></figure>
+<p>简化：hexo n 新建文章</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo new page<span class="string">&quot;pagename&quot;</span> </span><br></pre></td></tr></table></figure>
+<p>简化：hexo n p新建页面</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo clean </span><br></pre></td></tr></table></figure>
+<p>清理缓存</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo generate </span><br></pre></td></tr></table></figure>
+<p>简化：hexo g 生成静态页面</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo server </span><br></pre></td></tr></table></figure>
+<p>简化：hexo s 开启预览访问端口</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">hexo deploy </span><br></pre></td></tr></table></figure>
+<p>简化：hexo d 将.deploy目录部署到GitHub</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Hexo会根据配置文件渲染出一套静态页面</span></span><br><span class="line">hexo g</span><br><span class="line"><span class="comment"># 将上一步渲染出的一系列文件上传至至Github Pages</span></span><br><span class="line">hexo d</span><br><span class="line"><span class="comment"># 也可以直接输入此命令，直接完成渲染和上传</span></span><br><span class="line">hexo g -d</span><br></pre></td></tr></table></figure>
+<p>博客文章在 /blog/source/_posts 文章支持Markdown语法。如果想修改头像可以直接在主题的 _config.yml 文件里面修改，友情链接，之类的都在这里。</p>
+<p>上面的是Linux搭建方法，相信大家用Windows的比较多。推荐朋友的<a target="_blank" rel="noopener" href="https://blog.cat73.org/20160608/2016060801.github-hexo/">Windows搭建教程</a></p>
+<p>– END –</p>
 
     </div>
      
@@ -384,21 +381,18 @@ hexo deploy ```将.deploy目录部署到GitHub
 </div>
 
           <div class="post-tags">
-              <a href="/tags/Hexo/" rel="tag"><i class="fa fa-tag"></i> Hexo</a>
               <a href="/tags/Linux/" rel="tag"><i class="fa fa-tag"></i> Linux</a>
+              <a href="/tags/Hexo/" rel="tag"><i class="fa fa-tag"></i> Hexo</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
-                <a href="/2020/12/02/linux-crontab/" rel="prev" title="Crontab用法简解">
-                  <i class="fa fa-chevron-left"></i> Crontab用法简解
-                </a>
             </div>
             <div class="post-nav-item">
-                <a href="/2020/12/03/nginx-make/" rel="next" title="编译Nginx及相关配置详解">
-                  编译Nginx及相关配置详解 <i class="fa fa-chevron-right"></i>
+                <a href="/2020/12/01/git-ssh/" rel="next" title="使用SSH密钥进行Git登陆">
+                  使用SSH密钥进行Git登陆 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>

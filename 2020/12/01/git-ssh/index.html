@@ -34,9 +34,9 @@
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2020-12-01T06:57:03.000Z">
 <meta property="article:modified_time" content="2020-12-04T09:52:03.008Z">
-<meta property="article:tag" content="Linux">
 <meta property="article:tag" content="ssh">
 <meta property="article:tag" content="git">
+<meta property="article:tag" content="Linux">
 <meta name="twitter:card" content="summary">
 
 
@@ -315,7 +315,7 @@
 <p>看一下有没有id_rsa和id_rsa.pub，有 .pub 后缀的文件就是公钥，另一个文件则是密钥。</p>
 <p>假如没有这些文件，甚至连 .ssh 目录都没有，可以用 ssh-keygen 来创建。</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh-keygen -t rsa -C <span class="string">&quot;your_email@youremail.com&quot;</span></span><br></pre></td></tr></table></figure>
-<p><a href="mailto:&#121;&#x6f;&#x75;&#114;&#95;&#x65;&#x6d;&#97;&#105;&#108;&#x40;&#121;&#x6f;&#x75;&#114;&#101;&#109;&#97;&#105;&#108;&#x2e;&#x63;&#x6f;&#x6d;">&#121;&#x6f;&#x75;&#114;&#95;&#x65;&#x6d;&#97;&#105;&#108;&#x40;&#121;&#x6f;&#x75;&#114;&#101;&#109;&#97;&#105;&#108;&#x2e;&#x63;&#x6f;&#x6d;</a> 是你的邮箱，然后一路Enter,完了之后，大概是这样：</p>
+<p><a href="mailto:&#121;&#111;&#117;&#x72;&#95;&#x65;&#109;&#x61;&#x69;&#108;&#64;&#x79;&#111;&#x75;&#x72;&#101;&#109;&#97;&#105;&#x6c;&#46;&#x63;&#111;&#x6d;">&#121;&#111;&#117;&#x72;&#95;&#x65;&#109;&#x61;&#x69;&#108;&#64;&#x79;&#111;&#x75;&#x72;&#101;&#109;&#97;&#105;&#x6c;&#46;&#x63;&#111;&#x6d;</a> 是你的邮箱，然后一路Enter,完了之后，大概是这样：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Your public key has been saved <span class="keyword">in</span> /home/you/.ssh/id_rsa.pub.</span><br><span class="line">The key fingerprint is: <span class="comment"># 01:0f:f4:3b:ca:85:d6:17:a1:7d:f0:68:9d:f0:a2:db your_email@youremail.com</span></span><br></pre></td></tr></table></figure>
 <h2 id="添加公钥到GitHub"><a href="#添加公钥到GitHub" class="headerlink" title="添加公钥到GitHub"></a>添加公钥到GitHub</h2><h3 id="查看你生成的公钥："><a href="#查看你生成的公钥：" class="headerlink" title="查看你生成的公钥："></a>查看你生成的公钥：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cat ~/.ssh/id_rsa.pub</span><br><span class="line"></span><br><span class="line">ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC0X6L1zLL4VHuvGb8aJH3ippTozmReSUzgntvk434aJ/v7kOdJ/MTyBlWXFCR+HAo3FXRitBqxiX1nKhXpHAZsMciLq8vR3c8E7CjZN733f5AL8uEYJA+YZevY5UCvEg+umT7PHghKYaJwaCxV7sjYP7Z6V79OMCEAGDNXC26IBMdMgOluQjp6o6j2KAdtRBdCDS/QIU5THQDxJ9lBXjk1fiq9tITo/aXBvjZeD+gH/Apkh/0GbO8VQLiYYmNfqqAHHeXdltORn8N7C9lOa/UW3KM7QdXo6J0GFlBVQeTE/IGqhMS5PMln3 uemail@email.com</span><br></pre></td></tr></table></figure>
 <h3 id="登陆你的github帐户。点击你的头像，然后-Settings-gt-左栏点击-SSH-and-GPG-keys-gt-点击-New-SSH-key"><a href="#登陆你的github帐户。点击你的头像，然后-Settings-gt-左栏点击-SSH-and-GPG-keys-gt-点击-New-SSH-key" class="headerlink" title="登陆你的github帐户。点击你的头像，然后 Settings -&gt; 左栏点击 SSH and GPG keys -&gt; 点击 New SSH key"></a>登陆你的github帐户。点击你的头像，然后 Settings -&gt; 左栏点击 SSH and GPG keys -&gt; 点击 New SSH key</h3><h3 id="然后复制上面的公钥内容，粘贴进“Key”文本域内。-title域，自己随便起个名字。"><a href="#然后复制上面的公钥内容，粘贴进“Key”文本域内。-title域，自己随便起个名字。" class="headerlink" title="然后复制上面的公钥内容，粘贴进“Key”文本域内。 title域，自己随便起个名字。"></a>然后复制上面的公钥内容，粘贴进“Key”文本域内。 title域，自己随便起个名字。</h3><h3 id="点击-Add-key。"><a href="#点击-Add-key。" class="headerlink" title="点击 Add key。"></a>点击 Add key。</h3><p>完成以后，验证下这个key是不是正常工作：</p>
@@ -329,7 +329,7 @@
 <p>登陆你的github，打开project，点击Clone or download，你在上面可以看到你的ssh协议相应的url，类似：</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git@github.com:uname/project.git</span><br></pre></td></tr></table></figure>
 <p>复制此ssh链接，然后使用命令 git remote set-url 来调整你的url。</p>
-<p>git remote set-url origin <a href="mailto:&#103;&#x69;&#x74;&#x40;&#x67;&#105;&#x74;&#x68;&#117;&#x62;&#46;&#x63;&#111;&#109;">&#103;&#x69;&#x74;&#x40;&#x67;&#105;&#x74;&#x68;&#117;&#x62;&#46;&#x63;&#111;&#109;</a>:uname/project.git</p>
+<p>git remote set-url origin <a href="mailto:&#103;&#x69;&#x74;&#x40;&#103;&#105;&#x74;&#x68;&#x75;&#x62;&#x2e;&#x63;&#x6f;&#x6d;">&#103;&#x69;&#x74;&#x40;&#103;&#105;&#x74;&#x68;&#x75;&#x62;&#x2e;&#x63;&#x6f;&#x6d;</a>:uname/project.git</p>
 <p>然后，你可以再用命令 git remote -v 查看一下，url是否已经变成了ssh地址。</p>
 <p>最后,使用git fetch, git pull , git push，就再也不用输入密码了。</p>
 <h2 id="添加公钥到服务器git用户"><a href="#添加公钥到服务器git用户" class="headerlink" title="添加公钥到服务器git用户"></a>添加公钥到服务器git用户</h2><p>服务器新建.ssh文件夹</p>
@@ -380,15 +380,18 @@
 </div>
 
           <div class="post-tags">
-              <a href="/tags/Linux/" rel="tag"><i class="fa fa-tag"></i> Linux</a>
               <a href="/tags/ssh/" rel="tag"><i class="fa fa-tag"></i> ssh</a>
               <a href="/tags/git/" rel="tag"><i class="fa fa-tag"></i> git</a>
+              <a href="/tags/Linux/" rel="tag"><i class="fa fa-tag"></i> Linux</a>
           </div>
 
         
 
           <div class="post-nav">
             <div class="post-nav-item">
+                <a href="/2020/12/01/hexo-Linux/" rel="prev" title="Linux下搭建Hexo个人博客">
+                  <i class="fa fa-chevron-left"></i> Linux下搭建Hexo个人博客
+                </a>
             </div>
             <div class="post-nav-item">
                 <a href="/2020/12/01/tor-onion/" rel="next" title="搭建暗网网站">
