@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
+  <script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js"></script>
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"iinine.github.io","root":"/","images":"/images","scheme":"Gemini","version":"8.1.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+<meta name="description" content="由于近期TCP阻断频繁，于是部署基于WebSocket+TLS+Web的v2ray，将代理流量通过TLS加密，以此达到通过V2Ray访问任何网络都显示访问一个HTTPS网站，隐蔽性更高，也更安全。当然，这本来就是完整、真正的TLS流量。另外，这种TLS代理在速度或者说效率上对比TCP并没有什么优势，大家酌情部署！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="V2Ray使用Nginx实现WebSocket+TLS+Web代理">
+<meta property="og:url" content="https://iinine.github.io/2020/12/04/v2ray-tls-proxy/index.html">
+<meta property="og:site_name" content="三分地">
+<meta property="og:description" content="由于近期TCP阻断频繁，于是部署基于WebSocket+TLS+Web的v2ray，将代理流量通过TLS加密，以此达到通过V2Ray访问任何网络都显示访问一个HTTPS网站，隐蔽性更高，也更安全。当然，这本来就是完整、真正的TLS流量。另外，这种TLS代理在速度或者说效率上对比TCP并没有什么优势，大家酌情部署！">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-04T12:03:00.000Z">
+<meta property="article:modified_time" content="2020-12-04T09:32:20.039Z">
+<meta property="article:tag" content="v2ray">
+<meta property="article:tag" content="proxy">
+<meta property="article:tag" content="tls">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://iinine.github.io/2020/12/04/v2ray-tls-proxy/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>V2Ray使用Nginx实现WebSocket+TLS+Web代理 | 三分地</title>
+  
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">三分地</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">自由分享每一刻</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%B3%E8%AF%B7%E5%9F%9F%E5%90%8D%E5%92%8C%E5%A1%AB%E5%86%99DNS%E8%AE%B0%E5%BD%95"><span class="nav-number">1.</span> <span class="nav-text">申请域名和填写DNS记录</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E9%85%8D%E7%BD%AENginx"><span class="nav-number">2.</span> <span class="nav-text">服务端配置Nginx</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Nginx"><span class="nav-number">2.1.</span> <span class="nav-text">安装Nginx</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%85%8D%E7%BD%AENginx%E7%9A%84Server%E6%96%87%E4%BB%B6"><span class="nav-number">2.2.</span> <span class="nav-text">配置Nginx的Server文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE%E5%A6%82%E4%B8%8B%EF%BC%9A"><span class="nav-number">2.3.</span> <span class="nav-text">修改配置如下：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%B3%E8%AF%B7%E5%85%8D%E8%B4%B9SSL%E8%AF%81%E4%B9%A6"><span class="nav-number">3.</span> <span class="nav-text">申请免费SSL证书</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#V2Ray%E6%9C%8D%E5%8A%A1%E7%AB%AF%E9%85%8D%E7%BD%AE"><span class="nav-number">4.</span> <span class="nav-text">V2Ray服务端配置</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85v2ray%EF%BC%9A"><span class="nav-number">4.1.</span> <span class="nav-text">安装v2ray：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9v2ray%E9%85%8D%E7%BD%AE%E5%A6%82%E4%B8%8B"><span class="nav-number">4.2.</span> <span class="nav-text">修改v2ray配置如下:</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#V2Ray%E5%AE%A2%E6%88%B7%E7%AB%AF%E8%AE%BE%E7%BD%AE"><span class="nav-number">5.</span> <span class="nav-text">V2Ray客户端设置</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iinine" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iinine" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/yourname" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;yourname" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+
+
+        </section>
+      </div>
+        <div class="back-to-top animated">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://iinine.github.io/2020/12/04/v2ray-tls-proxy/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="三分地">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          V2Ray使用Nginx实现WebSocket+TLS+Web代理
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+      
+
+      <time title="创建时间：2020-12-04 20:03:00 / 修改时间：17:32:20" itemprop="dateCreated datePublished" datetime="2020-12-04T20:03:00+08:00">2020-12-04</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/proxy/" itemprop="url" rel="index"><span itemprop="name">proxy</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>由于近期TCP阻断频繁，于是部署基于WebSocket+TLS+Web的v2ray，将代理流量通过TLS加密，以此达到通过V2Ray访问任何网络都显示访问一个HTTPS网站，隐蔽性更高，也更安全。当然，这本来就是完整、真正的TLS流量。另外，这种TLS代理在速度或者说效率上对比TCP并没有什么优势，大家酌情部署！<a id="more"></a></p>
+<h2 id="申请域名和填写DNS记录"><a href="#申请域名和填写DNS记录" class="headerlink" title="申请域名和填写DNS记录"></a>申请域名和填写DNS记录</h2><p>首先你要注册一个免费域名，这个可以到<a target="_blank" rel="noopener" href="https://www.freenom.com/zh/index.html?lang=zh">Freenom</a>上免费搞一个，不多讲。</p>
+<p>域名注册好后，需要添加两条DNS记录，建议使用Cloudflare的DNS解析，如果IP被墙可以使用它的CDN复活，没被墙就不建议使用了，毕竟减速CDN不是白叫的。添加两条DNS解析记录，如果没有v6IP的话，就填一个v4IP，如下：</p>
+<table>
+<thead>
+<tr>
+<th>Name (prefix)</th>
+<th align="center">Type</th>
+<th align="center">TTL</th>
+<th align="center">Target</th>
+</tr>
+</thead>
+<tbody><tr>
+<td></td>
+<td align="center">A</td>
+<td align="center">3600</td>
+<td align="center">这里填写vps上的v4IP</td>
+</tr>
+<tr>
+<td></td>
+<td align="center">AAAA</td>
+<td align="center">3600</td>
+<td align="center">这里填写vps上的v6IP</td>
+</tr>
+</tbody></table>
+<p>上面完成后，就开始服务端的配置了。</p>
+<h2 id="服务端配置Nginx"><a href="#服务端配置Nginx" class="headerlink" title="服务端配置Nginx"></a>服务端配置Nginx</h2><h3 id="安装Nginx"><a href="#安装Nginx" class="headerlink" title="安装Nginx"></a>安装Nginx</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt-get install nginx</span><br></pre></td></tr></table></figure>
+<h3 id="配置Nginx的Server文件"><a href="#配置Nginx的Server文件" class="headerlink" title="配置Nginx的Server文件"></a>配置Nginx的Server文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/nginx/sites-available/default 或者 vi /etc/nginx/nginx.conf</span><br></pre></td></tr></table></figure>
+<h3 id="修改配置如下："><a href="#修改配置如下：" class="headerlink" title="修改配置如下："></a>修改配置如下：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">server &#123;</span><br><span class="line">    listen 80;</span><br><span class="line">    listen [::]:80; //这是IPv4和IPv6的80端口监听</span><br><span class="line">    server_name xxxx.com; //域名</span><br><span class="line">    // 下面是真正的ws转发给v2ray</span><br><span class="line">    location /ray &#123;   //与V2Ray配置中的path保持一致</span><br><span class="line">        proxy_redirect off;</span><br><span class="line">        proxy_pass http://127.0.0.1:10086; //假设WebSocket监听在环回地址的10086端口上</span><br><span class="line">        proxy_http_version 1.1;</span><br><span class="line">        proxy_set_header Upgrade <span class="variable">$http_upgrade</span>;</span><br><span class="line">        proxy_set_header Connection <span class="string">&quot;upgrade&quot;</span>;</span><br><span class="line">        proxy_set_header Host <span class="variable">$http_host</span>;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">server &#123;</span><br><span class="line">    listen 443 ssl http2;  //这是IPv4和IPv6的443端口监听及ssl和http2支持</span><br><span class="line">    listen [::]:443 ssl http2;      </span><br><span class="line">    server_name xxxx.com;   //域名</span><br><span class="line">    ssl_certificate /etc/letsencrypt/live/xxxx.com/fullchain.pem;  //证书路径，xxxx.xxx改成你的域名</span><br><span class="line">    ssl_certificate_key /etc/letsencrypt/live/xxxx.com/privkey.pem;</span><br><span class="line">    location /ray &#123;     // path路径</span><br><span class="line">        proxy_redirect off;</span><br><span class="line">        proxy_pass http://127.0.0.1:10086;</span><br><span class="line">        proxy_http_version 1.1;</span><br><span class="line">        proxy_set_header Upgrade <span class="variable">$http_upgrade</span>;</span><br><span class="line">        proxy_set_header Connection <span class="string">&quot;upgrade&quot;</span>;</span><br><span class="line">        proxy_set_header Host <span class="variable">$http_host</span>;</span><br><span class="line">        // 下面是realip日志，在access.log里面，可留可删除，随意</span><br><span class="line">        proxy_set_header X-Real-IP <span class="variable">$remote_addr</span>;</span><br><span class="line">        proxy_set_header X-Forwarded-For <span class="variable">$proxy_add_x_forwarded_for</span>;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对于已经用nginx搭建网站的用户，就更简单了，只要在443端口下添加以下ws转发就好了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">// 下面是真正的ws转发给v2ray</span><br><span class="line">location /ray &#123;   //与V2Ray配置中的path保持一致</span><br><span class="line">    proxy_redirect off;</span><br><span class="line">    proxy_pass http://127.0.0.1:10086; //假设WebSocket监听在环回地址的10086端口上</span><br><span class="line">    proxy_http_version 1.1;</span><br><span class="line">    proxy_set_header Upgrade <span class="variable">$http_upgrade</span>;</span><br><span class="line">    proxy_set_header Connection <span class="string">&quot;upgrade&quot;</span>;</span><br><span class="line">    proxy_set_header Host <span class="variable">$http_host</span>;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>下面是nginx.conf完整配置实例，注意修改域名和证书文件夹名。（适用于初接触nginx用户）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line">user nginx;</span><br><span class="line">pid /run/nginx.pid;</span><br><span class="line">worker_processes auto;</span><br><span class="line">worker_rlimit_nofile 51200;</span><br><span class="line"></span><br><span class="line">events &#123;</span><br><span class="line">    worker_connections 1024;</span><br><span class="line">    multi_accept on;</span><br><span class="line">    use epoll;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">http &#123;</span><br><span class="line">    server_tokens off;</span><br><span class="line">    sendfile on;</span><br><span class="line">    tcp_nopush on;</span><br><span class="line">    tcp_nodelay on;</span><br><span class="line">    keepalive_timeout 120s;</span><br><span class="line">    keepalive_requests 10000;</span><br><span class="line">    types_hash_max_size 2048;</span><br><span class="line">    include /etc/nginx/mime.types;</span><br><span class="line"></span><br><span class="line">    access_log off;</span><br><span class="line">    error_log /dev/null;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen 80;</span><br><span class="line">        listen [::]:80;</span><br><span class="line">        server_name xxxx.com;</span><br><span class="line"></span><br><span class="line">        location /ray &#123;</span><br><span class="line">            proxy_redirect off;</span><br><span class="line">            proxy_pass http://127.0.0.1:10086;</span><br><span class="line">            proxy_http_version 1.1;</span><br><span class="line">            proxy_set_header Upgrade <span class="variable">$http_upgrade</span>;</span><br><span class="line">            proxy_set_header Connection <span class="string">&quot;upgrade&quot;</span>;</span><br><span class="line">            proxy_set_header Host <span class="variable">$http_host</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen 443 ssl http2;</span><br><span class="line">        listen [::]:443 ssl http2;      </span><br><span class="line">        server_name xxxx.com;</span><br><span class="line">        ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;</span><br><span class="line">        ssl_ciphers ECDHE-RSA-AES128-GCM-SHA256:HIGH:!aNULL:!MD5:!RC4:!DHE;</span><br><span class="line">        ssl_prefer_server_ciphers on;</span><br><span class="line">        ssl_certificate /etc/letsencrypt/live/xxxx.com/fullchain.pem;</span><br><span class="line">        ssl_certificate_key /etc/letsencrypt/live/xxxx.com/privkey.pem;</span><br><span class="line">        location /ray &#123;</span><br><span class="line">            proxy_redirect off;</span><br><span class="line">            proxy_pass http://127.0.0.1:10086;</span><br><span class="line">            proxy_http_version 1.1;</span><br><span class="line">            proxy_set_header Upgrade <span class="variable">$http_upgrade</span>;</span><br><span class="line">            proxy_set_header Connection <span class="string">&quot;upgrade&quot;</span>;</span><br><span class="line">            proxy_set_header Host <span class="variable">$http_host</span>;</span><br><span class="line">            proxy_set_header X-Real-IP <span class="variable">$remote_addr</span>;</span><br><span class="line">            proxy_set_header X-Forwarded-For <span class="variable">$proxy_add_x_forwarded_for</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>如果你只用80端口的话是没必要去申请证书的，配置好v2ray的config.json文件就可以直接用的，当然这就只能是ws代理，不支持tls加密了。443端口需要申请ssl证书，往下看。</p>
+<h2 id="申请免费SSL证书"><a href="#申请免费SSL证书" class="headerlink" title="申请免费SSL证书"></a>申请免费SSL证书</h2><p>用Git获取 Letsencrypt</p>
+<p>注: 生成证书前请关闭服务器的Apache或Nginx,否则会生成失败。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">// 获取letsencrypt</span><br><span class="line"> </span><br><span class="line">git <span class="built_in">clone</span> https://github.com/letsencrypt/letsencrypt</span><br><span class="line"> </span><br><span class="line">// 进入letsencrypt目录</span><br><span class="line"> </span><br><span class="line"><span class="built_in">cd</span> letsencrypt</span><br><span class="line"> </span><br><span class="line">// 生成证书</span><br><span class="line"> </span><br><span class="line">./letsencrypt-auto certonly --standalone --email 你的邮箱 -d xxxx.com(域名) -d www.xxxx.com</span><br><span class="line"></span><br><span class="line">// 一个域名就不需要 -d www.xxxx.com，多个域名就可以一直 -d 下去</span><br></pre></td></tr></table></figure>
+<p>在完成Let’s Encrypt证书的生成之后，我们会在<code> bash /etc/letsencrypt/live/xxxx.com/域</code>名目录下有4个文件就是生成的密钥证书文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">cert.pem -  used <span class="keyword">for</span> OCSP stapling <span class="keyword">in</span> Nginx &gt;=1.3.7.</span><br><span class="line"></span><br><span class="line">chain.pem - will <span class="built_in">break</span> many server configurations, and should not be used without reading further documentation </span><br><span class="line"></span><br><span class="line">fullchain.pem - 在大多数服务器软件中使用的证书文件。</span><br><span class="line"></span><br><span class="line">privkey.pem - 证书私钥</span><br><span class="line">``` bash</span><br><span class="line">在Nginx环境下，那就需要用到``` bash fullchain.pem```和``` bash privkey.pem```两个证书文件，在部署Nginx的时候只要将对应的``` bash ssl_certificate```和``` bash ssl_certificate_key```路径设置成生成的2个文件就可以。</span><br><span class="line"></span><br><span class="line">打开``` bash /etc/nginx/sites-available/default```填入如下内容：（上面的nginx的配置文件已经添加进去了）</span><br><span class="line">``` bash</span><br><span class="line">ssl_certificate /etc/letsencrypt/live/xxxx.com/fullchain.pem; //xxxx.com是你的域名</span><br><span class="line">ssl_certificate_key /etc/letsencrypt/live/xxxx.com/privkey.pem;</span><br></pre></td></tr></table></figure>
+<p>Let’s Encrypt免费SSL证书有效期为90天, 需要我们自己手工更新续期才可以，手工续期如下命令：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">systemctl stop nginx</span><br><span class="line"></span><br><span class="line"><span class="built_in">cd</span> letsencrypt</span><br><span class="line"></span><br><span class="line">./letsencrypt-auto certonly --renew-by-default --email 你的邮箱 -d xxxx.xxx -d www.xxx.com</span><br><span class="line"></span><br><span class="line">systemctl start nginx</span><br></pre></td></tr></table></figure>
+<p>看到这里是不是发现，俺在搭建一个完整的https网站，不错，到这一步你只要写一个html静态页面放在根目录下，这个站点就可以通过浏览器正常访问了。闲话不多说，往下看。</p>
+<h2 id="V2Ray服务端配置"><a href="#V2Ray服务端配置" class="headerlink" title="V2Ray服务端配置"></a>V2Ray服务端配置</h2><p>证书申请好了以后，配置好nginx后，就要安装v2ray和修改服务端的配置文件了。</p>
+<h3 id="安装v2ray："><a href="#安装v2ray：" class="headerlink" title="安装v2ray："></a>安装v2ray：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">// 下载脚本</span><br><span class="line">$ wget https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh </span><br><span class="line"></span><br><span class="line">// 安装v2ray</span><br><span class="line">$ bash install-release.sh</span><br></pre></td></tr></table></figure>
+<h3 id="修改v2ray配置如下"><a href="#修改v2ray配置如下" class="headerlink" title="修改v2ray配置如下:"></a>修改v2ray配置如下:</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line">vi /usr/<span class="built_in">local</span>/etc/v2ray/config.json</span><br><span class="line"></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;inbounds&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">&quot;port&quot;</span>: 10086,    //同nginx上的环回地址端口保持一致</span><br><span class="line">      <span class="string">&quot;listen&quot;</span>:<span class="string">&quot;127.0.0.1&quot;</span>, //只监听 127.0.0.1，避免除本机外的机器探测到开放了 10086 端口</span><br><span class="line">      <span class="string">&quot;protocol&quot;</span>: <span class="string">&quot;vmess&quot;</span>,</span><br><span class="line">      <span class="string">&quot;settings&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;clients&quot;</span>: [</span><br><span class="line">          &#123;</span><br><span class="line">            <span class="string">&quot;id&quot;</span>: <span class="string">&quot;b831381d-6324-4d53-ad4f-8cda48b30811&quot;</span>,</span><br><span class="line">            <span class="string">&quot;alterId&quot;</span>: 64</span><br><span class="line">          &#125;</span><br><span class="line">        ]</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="string">&quot;streamSettings&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;network&quot;</span>: <span class="string">&quot;ws&quot;</span>,</span><br><span class="line">        <span class="string">&quot;wsSettings&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;path&quot;</span>: <span class="string">&quot;/ray&quot;</span>  //同nginx上的路径一致</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="string">&quot;outbounds&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">&quot;protocol&quot;</span>: <span class="string">&quot;freedom&quot;</span>,</span><br><span class="line">      <span class="string">&quot;settings&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;domainStrategy&quot;</span>: <span class="string">&quot;UseIP&quot;</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="string">&quot;dns&quot;</span>: &#123;    //开启DoH</span><br><span class="line">      <span class="string">&quot;servers&quot;</span>: [</span><br><span class="line">          <span class="string">&quot;https+local://1.1.1.1/dns-query&quot;</span>,</span><br><span class="line">          <span class="string">&quot;1.1.1.1&quot;</span>,</span><br><span class="line">          <span class="string">&quot;8.8.8.8&quot;</span>,</span><br><span class="line">          <span class="string">&quot;localhost&quot;</span></span><br><span class="line">      ]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">systemctl start nginx //启动nginx</span><br><span class="line"></span><br><span class="line">systemctl start v2ray //启动v2ray</span><br><span class="line"></span><br><span class="line">bash install-release.sh //更新v2ray</span><br><span class="line"></span><br><span class="line">bash install-release.sh --remove //移除v2ray</span><br></pre></td></tr></table></figure>
+<p>到此就可以开启Nginx和V2Ray了，服务端也就全部完成，下面就是折腾客户端了。另，这些配置文件建议先在本地修改好后再scp到服务端，因为服务端上的vi编写js文件容易遇到缩进问题。</p>
+<h2 id="V2Ray客户端设置"><a href="#V2Ray客户端设置" class="headerlink" title="V2Ray客户端设置"></a>V2Ray客户端设置</h2><p>首先从V2Ray官网下载软件。</p>
+<p>客户端config.json文件配置：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;inbounds&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">&quot;port&quot;</span>: 1080,</span><br><span class="line">      <span class="string">&quot;listen&quot;</span>: <span class="string">&quot;127.0.0.1&quot;</span>,</span><br><span class="line">      <span class="string">&quot;protocol&quot;</span>: <span class="string">&quot;socks&quot;</span>,</span><br><span class="line">      <span class="string">&quot;sniffing&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;enabled&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">        <span class="string">&quot;destOverride&quot;</span>: [<span class="string">&quot;http&quot;</span>, <span class="string">&quot;tls&quot;</span>]</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="string">&quot;settings&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;auth&quot;</span>: <span class="string">&quot;noauth&quot;</span>,</span><br><span class="line">        <span class="string">&quot;udp&quot;</span>: <span class="literal">false</span></span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ],</span><br><span class="line">  <span class="string">&quot;outbounds&quot;</span>: [</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="string">&quot;protocol&quot;</span>: <span class="string">&quot;vmess&quot;</span>,</span><br><span class="line">      <span class="string">&quot;settings&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;vnext&quot;</span>: [</span><br><span class="line">          &#123;</span><br><span class="line">            <span class="string">&quot;address&quot;</span>: <span class="string">&quot;xxxx.xxx&quot;</span>,  //域名</span><br><span class="line">            <span class="string">&quot;port&quot;</span>: 443,</span><br><span class="line">            <span class="string">&quot;users&quot;</span>: [</span><br><span class="line">              &#123;</span><br><span class="line">                <span class="string">&quot;id&quot;</span>: <span class="string">&quot;b831381d-6324-4d53-ad4f-8cda48b30811&quot;</span>,</span><br><span class="line">                <span class="string">&quot;alterId&quot;</span>: 64</span><br><span class="line">              &#125;</span><br><span class="line">            ]</span><br><span class="line">          &#125;</span><br><span class="line">        ]</span><br><span class="line">      &#125;,</span><br><span class="line">      <span class="string">&quot;streamSettings&quot;</span>: &#123;</span><br><span class="line">        <span class="string">&quot;network&quot;</span>: <span class="string">&quot;ws&quot;</span>,</span><br><span class="line">        <span class="string">&quot;security&quot;</span>: <span class="string">&quot;tls&quot;</span>,</span><br><span class="line">        <span class="string">&quot;wsSettings&quot;</span>: &#123;</span><br><span class="line">          <span class="string">&quot;path&quot;</span>: <span class="string">&quot;/ray&quot;</span>  //路径</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>客户端白话配置如下，主要就是选择ws传输协议，填上type路径，还有打开tls传输。</p>
+<p>80端口配置，不需要打开tls传输，如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">地址(address) : xxxx.xxx	//这里填写你的域名或IP</span><br><span class="line"></span><br><span class="line">端口(port) : 80</span><br><span class="line"></span><br><span class="line">用户ID(uuid) : 这里填写你的UUID</span><br><span class="line"></span><br><span class="line">额外ID(alterid) : 64</span><br><span class="line"></span><br><span class="line">加密方式(security) : auto</span><br><span class="line"></span><br><span class="line">传输协议(network) : ws</span><br><span class="line"></span><br><span class="line">伪装域名(host) : cloudfront.com //可选项</span><br><span class="line"></span><br><span class="line">路径(<span class="built_in">type</span>) : /ray</span><br></pre></td></tr></table></figure>
+<p>443端口配置，443端口需要打开底层tls传输，如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">地址(address) : xxxx.xxx	//这里填写你的域名或IP</span><br><span class="line"></span><br><span class="line">端口(port) : 443</span><br><span class="line"></span><br><span class="line">用户ID(uuid) : 这里填写你的UUID</span><br><span class="line"></span><br><span class="line">额外ID(alterid) : 64</span><br><span class="line"></span><br><span class="line">加密方式(security) : auto</span><br><span class="line"></span><br><span class="line">传输协议(network) : ws</span><br><span class="line"></span><br><span class="line">伪装域名(host) : cloudfront.com //可选项</span><br><span class="line"></span><br><span class="line">路径(<span class="built_in">type</span>) : /ray</span><br><span class="line"></span><br><span class="line">底层传输 ：tls</span><br></pre></td></tr></table></figure>
+<p>80和443端口都可以使用，到这也就全部完成了。有建站经验的网友应该很容易上手。提醒一下，用之前清理一下浏览器缓存。</p>
+<p>参考：</p>
+<p><a target="_blank" rel="noopener" href="https://toutyrater.github.io/advanced/wss_and_web.html">V2Ray的WebSocket+TLS+Web配置</a></p>
+
+    </div>
+     
+	 <div> 
+	 <div>
+ 
+  <div style="text-align:center;color:#bfbfbf;font-size:16px;">
+    <span>-------- 本文结束 </span>
+	<i class="fa fa-paw"></i>
+	<span> 感谢阅读 --------</span>
+  </div> 
+
+</div>
+ 
+	 </div>
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div></div>
+  <button onclick="document.querySelector('.post-reward').classList.toggle('active');">
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/bitcoin.png" alt=" 比特币">
+        <span>比特币</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/v2ray/" rel="tag"><i class="fa fa-tag"></i> v2ray</a>
+              <a href="/tags/proxy/" rel="tag"><i class="fa fa-tag"></i> proxy</a>
+              <a href="/tags/tls/" rel="tag"><i class="fa fa-tag"></i> tls</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/12/04/v2ray-ss-proxy/" rel="prev" title="服务端搭建Shadowsocks和V2Ray详解">
+                  <i class="fa fa-chevron-left"></i> 服务端搭建Shadowsocks和V2Ray详解
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/12/05/nginx-stream/" rel="next" title="利用Nginx中转国内VPS">
+                  利用Nginx中转国内VPS <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"></span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+  <script>
+    NProgress.configure({
+      showSpinner: false
+    });
+    NProgress.start();
+    document.addEventListener('readystatechange', () => {
+      if (document.readyState === 'interactive') {
+        NProgress.inc(0.8);
+      }
+      if (document.readyState === 'complete') {
+        NProgress.done();
+      }
+    });
+    document.addEventListener('pjax:send', () => {
+      NProgress.start();
+    });
+    document.addEventListener('pjax:success', () => {
+      NProgress.done();
+    });
+  </script>
+
+  
+
+
+
+
+    <div class="pjax">
+
+
+    </div>
+</body>
+</html>

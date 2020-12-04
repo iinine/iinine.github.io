@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.15.1/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/animate.css@3.1.1/animate.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.css">
+  <script src="//cdn.jsdelivr.net/npm/nprogress@0.2.0/nprogress.js"></script>
+
+<script class="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"iinine.github.io","root":"/","images":"/images","scheme":"Gemini","version":"8.1.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":false,"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":true,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"}};
+  </script>
+<meta name="description" content="由于三胖还没去见马克思，本打算不再写关于tor的文章，鉴于近期机场频繁被端，推上一片惶恐，感觉是时候再写一篇关于匿名的文章了。另，祈南方水患尽退，瘟疫不再来！">
+<meta property="og:type" content="article">
+<meta property="og:title" content="搭建暗网网站">
+<meta property="og:url" content="https://iinine.github.io/2020/12/01/tor-onion/index.html">
+<meta property="og:site_name" content="三分地">
+<meta property="og:description" content="由于三胖还没去见马克思，本打算不再写关于tor的文章，鉴于近期机场频繁被端，推上一片惶恐，感觉是时候再写一篇关于匿名的文章了。另，祈南方水患尽退，瘟疫不再来！">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2020-12-01T10:10:36.000Z">
+<meta property="article:modified_time" content="2020-12-04T09:32:20.026Z">
+<meta property="article:tag" content="tor">
+<meta property="article:tag" content="暗网">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://iinine.github.io/2020/12/01/tor-onion/">
+
+
+<script data-pjax class="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+<title>搭建暗网网站 | 三分地</title>
+  
+
+
+
+  <noscript>
+  <style>
+  body { margin-top: 2rem; }
+
+  .use-motion .menu-item,
+  .use-motion .sidebar,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header {
+    visibility: visible;
+  }
+
+  .use-motion .header,
+  .use-motion .site-brand-container .toggle,
+  .use-motion .footer { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle,
+  .use-motion .custom-logo-image {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line {
+    transform: scaleX(1);
+  }
+
+  .search-pop-overlay, .sidebar-nav { display: none; }
+  .sidebar-panel { display: block; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <h1 class="site-title">三分地</h1>
+      <i class="logo-line"></i>
+    </a>
+      <p class="site-subtitle" itemprop="description">自由分享每一刻</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+        
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+    <span class="toggle-line"></span>
+  </div>
+
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <section class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85Tor"><span class="nav-number">1.</span> <span class="nav-text">安装Tor</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9torrc%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="nav-number">1.1.</span> <span class="nav-text">修改torrc配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%B7%BB%E5%8A%A0%E4%B8%8B%E9%9D%A2%E5%86%85%E5%AE%B9%EF%BC%9A"><span class="nav-number">1.2.</span> <span class="nav-text">添加下面内容：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9%E4%BF%9D%E5%AD%98%E5%90%8E%EF%BC%8C%E5%90%AF%E5%8A%A8tor%EF%BC%9A"><span class="nav-number">1.3.</span> <span class="nav-text">修改保存后，启动tor：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%AF%86%E9%92%A5%EF%BC%9A"><span class="nav-number">1.4.</span> <span class="nav-text">查看密钥：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%9F%9F%E5%90%8D%EF%BC%9A"><span class="nav-number">1.5.</span> <span class="nav-text">查看域名：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%85%8D%E7%BD%AENginx"><span class="nav-number">2.</span> <span class="nav-text">配置Nginx</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A6%96%E5%85%88%E4%BE%9D%E6%97%A7%E6%98%AF%E5%AE%89%E8%A3%85nginx%EF%BC%9A"><span class="nav-number">2.1.</span> <span class="nav-text">首先依旧是安装nginx：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#nignx%E9%85%8D%E7%BD%AEserver%E6%AE%B5%EF%BC%9A"><span class="nav-number">2.2.</span> <span class="nav-text">nignx配置server段：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%84%B6%E5%90%8E%E9%87%8D%E5%90%AFnginx%EF%BC%9A"><span class="nav-number">2.3.</span> <span class="nav-text">然后重启nginx：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%85%B6%E5%AE%83"><span class="nav-number">3.</span> <span class="nav-text">其它</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BF%AE%E6%94%B9onion%E5%9F%9F%E5%90%8D"><span class="nav-number">3.1.</span> <span class="nav-text">修改onion域名</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E6%97%A5%E5%BF%97"><span class="nav-number">3.2.</span> <span class="nav-text">服务端日志</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%BF%90%E8%A1%8C%E5%8E%9F%E7%90%86%E5%8F%8A%E9%85%8D%E7%BD%AE%E5%8F%82%E8%80%83"><span class="nav-number">3.3.</span> <span class="nav-text">运行原理及配置参考</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%9A%97%E7%BD%91%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="nav-number">4.</span> <span class="nav-text">暗网注意事项</span></a></li></ol></div>
+        </section>
+        <!--/noindex-->
+
+        <section class="site-overview-wrap sidebar-panel">
+          <div class="site-author site-overview-item animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt=""
+      src="/images/avatar.jpg">
+  <p class="site-author-name" itemprop="name"></p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap site-overview-item animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">10</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">7</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author site-overview-item animated">
+      <span class="links-of-author-item">
+        <a href="https://github.com/iinine" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;iinine" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="https://twitter.com/yourname" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;yourname" rel="noopener" target="_blank"><i class="fab fa-twitter fa-fw"></i>Twitter</a>
+      </span>
+  </div>
+
+
+
+        </section>
+      </div>
+        <div class="back-to-top animated">
+          <i class="fa fa-arrow-up"></i>
+          <span>0%</span>
+        </div>
+    </div>
+  </aside>
+  <div class="sidebar-dimmer"></div>
+
+
+    </header>
+
+    
+  <div class="reading-progress-bar"></div>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://iinine.github.io/2020/12/01/tor-onion/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.jpg">
+      <meta itemprop="name" content="">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="三分地">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          搭建暗网网站
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2020-12-01 18:10:36" itemprop="dateCreated datePublished" datetime="2020-12-01T18:10:36+08:00">2020-12-01</time>
+    </span>
+      <span class="post-meta-item">
+        <span class="post-meta-item-icon">
+          <i class="far fa-calendar-check"></i>
+        </span>
+        <span class="post-meta-item-text">更新于</span>
+        <time title="修改时间：2020-12-04 17:32:20" itemprop="dateModified" datetime="2020-12-04T17:32:20+08:00">2020-12-04</time>
+      </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E6%9A%97%E7%BD%91/" itemprop="url" rel="index"><span itemprop="name">暗网</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>由于三胖还没去见马克思，本打算不再写关于tor的文章，鉴于近期机场频繁被端，推上一片惶恐，感觉是时候再写一篇关于匿名的文章了。另，祈南方水患尽退，瘟疫不再来！<a id="more"></a></p>
+<p>说说暗网的好处，它能隐藏博主的服务器；它能隐藏访问者IP，不被追踪。这两条简直就是为审查国量身定制的。</p>
+<p>搭建暗网你要摒弃常规网站搭建方式，什么域名、DNS解析、TLS加密，统统地不需要，tor自有一套加密、解密方式，加入SSL反而引入特征。目前，俺也就发现Facebook那个傻缺加入了SSL证书，另不要羡慕Facebook那个域名了，已经过时了，现在onion服务已经进化为v3版了，而它还在用v2版域名。（说这么多还是羡慕它的域名，酸！）</p>
+<p>上面尽是废话，下面开搞。</p>
+<h2 id="安装Tor"><a href="#安装Tor" class="headerlink" title="安装Tor"></a>安装Tor</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install tor</span><br></pre></td></tr></table></figure>
+<h3 id="修改torrc配置文件"><a href="#修改torrc配置文件" class="headerlink" title="修改torrc配置文件"></a>修改torrc配置文件</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/tor/torrc</span><br></pre></td></tr></table></figure>
+<h3 id="添加下面内容："><a href="#添加下面内容：" class="headerlink" title="添加下面内容："></a>添加下面内容：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#密钥和域名路径</span></span><br><span class="line">HiddenServiceDir /var/lib/tor/hidden_service/</span><br><span class="line"><span class="comment">#下面这行是开启最新v3版域名，默认是v2版，去掉前面#号即可开启，v3域名更长</span></span><br><span class="line"><span class="comment">#HiddenServiceVersion 3</span></span><br><span class="line"><span class="comment">#下面是默认端口转发，如果服务器不干别的话，俺是建议直接用80端口的</span></span><br><span class="line">HiddenServicePort 80 127.0.0.1:8080</span><br></pre></td></tr></table></figure>
+<p>如果服务器80端口闲置的话，建议直接用80端口。因为端口转发的话，俺发现对于alias链不是很友好。直接用80端口，删掉后面127.0.0.1:8080就可以了。当然这个torrc文件你还可以一起配置搭建obfs4网桥，具体方法看俺上一篇博文。</p>
+<h3 id="修改保存后，启动tor："><a href="#修改保存后，启动tor：" class="headerlink" title="修改保存后，启动tor："></a>修改保存后，启动tor：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl start tor</span><br></pre></td></tr></table></figure>
+<p>当tor启动后，会创建一个私钥在你的hidden_service目录，同时创建你的独一无二的.onion域名。</p>
+<h3 id="查看密钥："><a href="#查看密钥：" class="headerlink" title="查看密钥："></a>查看密钥：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /var/lib/tor/hidden_service/private_key</span><br></pre></td></tr></table></figure>
+<h3 id="查看域名："><a href="#查看域名：" class="headerlink" title="查看域名："></a>查看域名：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cat /var/lib/tor/hidden_service/hostname</span><br></pre></td></tr></table></figure>
+<p>记下上面的域名，以便后面访问。</p>
+<h2 id="配置Nginx"><a href="#配置Nginx" class="headerlink" title="配置Nginx"></a>配置Nginx</h2><h3 id="首先依旧是安装nginx："><a href="#首先依旧是安装nginx：" class="headerlink" title="首先依旧是安装nginx："></a>首先依旧是安装nginx：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">apt install nginx</span><br></pre></td></tr></table></figure>
+<h3 id="nignx配置server段："><a href="#nignx配置server段：" class="headerlink" title="nignx配置server段："></a>nignx配置server段：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">vi /etc/nginx/nginx.conf</span><br><span class="line"><span class="comment">#server段添加下面内容</span></span><br><span class="line"></span><br><span class="line">    server &#123;</span><br><span class="line">        listen 8080;    <span class="comment">#可以直接改用80端口</span></span><br><span class="line">        listen [::]:8080;</span><br><span class="line">        root /var/www/blog; <span class="comment">#网站根目录，这里就是你的网站内容</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<h3 id="然后重启nginx："><a href="#然后重启nginx：" class="headerlink" title="然后重启nginx："></a>然后重启nginx：</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">systemctl restart nginx</span><br></pre></td></tr></table></figure>
+<p>最后，用tor访问你的暗网域名也就可以了。</p>
+<h2 id="其它"><a href="#其它" class="headerlink" title="其它"></a>其它</h2><h3 id="修改onion域名"><a href="#修改onion域名" class="headerlink" title="修改onion域名"></a>修改onion域名</h3><p>onion的域名生成是：私钥&gt;（rsa）&gt;公钥&gt;（sha1）&gt;杂凑值&gt;（base32编码）&gt;得到很丑的地址.onion，这道理跟比特币生成特定地址是同样的，但是因为计算量太大所以都会折衷，只会运算出地址前几位有个人特色的域名。</p>
+<p>所以原理是，使用高性能运算机器，不停地尝试不同的私钥输入，看有没有满意的结果，例如Facebook的洋葱地址 facebookcorewwwi.onion 相当的漂亮，要爆破这么多位，大概也只有Facebook等拥有超大规模服务器集群的厂商可以做得到，因为在密码学上的评估要暴力解出这样的结果以1.5Ghz处理器要260万年，Facebook展现出庞大运算的惊人实力。这是暗网目前最漂亮的域名了。</p>
+<p>下面是几个运算域名项目地址：</p>
+<p><a target="_blank" rel="noopener" href="https://github.com/katmagic/Shallot">https://github.com/katmagic/Shallot</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/lachesis/scallion">https://github.com/lachesis/scallion</a></p>
+<p><a target="_blank" rel="noopener" href="https://github.com/cathugger/mkp224o">https://github.com/cathugger/mkp224o</a></p>
+<p>注：本人建议是没必要修改.onion域名的，反正改来改去都是一样的丑，用默认生成的就好。（除非你有Facebook一样的算力）</p>
+<h3 id="服务端日志"><a href="#服务端日志" class="headerlink" title="服务端日志"></a>服务端日志</h3><p>暗网服务端，是有日志的，但是服务端的日志不显示IP，IP统一显示为127.0.0.1，下面是暗网和明网的日志比较：</p>
+<p>暗网：127.0.0.1 - - [29/Jun/2020:23:57:09 +0800] “GET /js/utils.js HTTP/1.1” 200 14103 “<a target="_blank" rel="noopener" href="http://vq7kihyfoqcoluju.onion&quot;/">http://vq7kihyfoqcoluju.onion&quot;</a> “Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0”</p>
+<p>明网：141.164.50.189 - - [12/Jul/2020:00:03:18 +0800] “GET / HTTP/2.0” 200 8770 “-“ “Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36”</p>
+<p>可以看到，暗网博主是看不到你的IP的。另，多唠叨一句访问暗网必须用tor才能访问。</p>
+<h3 id="运行原理及配置参考"><a href="#运行原理及配置参考" class="headerlink" title="运行原理及配置参考"></a>运行原理及配置参考</h3><p>下面是官方的onion服务协议文档：</p>
+<p><a target="_blank" rel="noopener" href="https://2019.www.torproject.org/docs/onion-services">https://2019.www.torproject.org/docs/onion-services</a></p>
+<p>下面是官方onion服务配置文档：</p>
+<p><a target="_blank" rel="noopener" href="https://2019.www.torproject.org/docs/tor-onion-service.html.en">https://2019.www.torproject.org/docs/tor-onion-service.html.en</a></p>
+<h2 id="暗网注意事项"><a href="#暗网注意事项" class="headerlink" title="暗网注意事项"></a>暗网注意事项</h2><p>如果你的网站需要彻底的匿名，或者说不被有关部门跟踪，你需要注意以下防范措施：</p>
+<p>不要在这台服务器上运行或做其它事情。<br>在新服务器或 VPS 上进行全新安装。<br>不要保留或运行来自 VPS 提供商那儿的任何服务。<br>用 Paypal 支付你的 VPS 服务，最好使用 Bitcoin。<br>不要向 VPS 提供关于你的任何身份信息。<br>不要在这台服务器上运行 Tor 中继，因为 Tor 中继在真实世界的公开 IP 是公开的。<br>不要从这台服务器发送电子邮件。<br>不要运行 WEB 软件。如果你的 WEB 软件有管理员登陆或管理员账号，把密码改成复杂的26个字符组成的密码。很多Tor网站被攻破只是某人猜到了管理员登陆密码。<br>避免使用任何 JavaScript 之类脚本的 WEB 软件。<br>确保你的 WEB 应用不会泄露任何错误信息或身份信息，比如在错误信息中的真实公开 IP。<br>审查 WEB 前端代码，确保它不会从 jquery.com、Google Fonts 或任何外部服务拉取资源。<br>及时做好 VPS 的安全更新。</p>
+
+    </div>
+     
+	 <div> 
+	 <div>
+ 
+  <div style="text-align:center;color:#bfbfbf;font-size:16px;">
+    <span>-------- 本文结束 </span>
+	<i class="fa fa-paw"></i>
+	<span> 感谢阅读 --------</span>
+  </div> 
+
+</div>
+ 
+	 </div>
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="reward-container">
+  <div></div>
+  <button onclick="document.querySelector('.post-reward').classList.toggle('active');">
+    赞赏
+  </button>
+  <div class="post-reward">
+      <div>
+        <img src="/images/bitcoin.png" alt=" 比特币">
+        <span>比特币</span>
+      </div>
+
+  </div>
+</div>
+
+          <div class="post-tags">
+              <a href="/tags/tor/" rel="tag"><i class="fa fa-tag"></i> tor</a>
+              <a href="/tags/%E6%9A%97%E7%BD%91/" rel="tag"><i class="fa fa-tag"></i> 暗网</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/2020/12/01/git-ssh/" rel="prev" title="使用SSH密钥进行Git登陆">
+                  <i class="fa fa-chevron-left"></i> 使用SSH密钥进行Git登陆
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2020/12/02/hexo-markdown/" rel="next" title="Markdown即md文件的基本编写语法">
+                  Markdown即md文件的基本编写语法 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      const activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      const commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"></span>
+</div>
+
+    </div>
+  </footer>
+
+  
+  <script src="//cdn.jsdelivr.net/npm/animejs@3.2.1/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/@next-theme/pjax@0.4.0/pjax.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1.16.0/dist/lozad.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script><script src="/js/next-boot.js"></script><script>
+var pjax = new Pjax({
+  selectors: [
+    'head title',
+    '.page-configurations',
+    '.main-inner',
+    '.post-toc-wrap',
+    '.languages',
+    '.pjax'
+  ],
+  analytics: false,
+  cacheBust: false,
+  scrollRestoration: false,
+  scrollTo: !CONFIG.bookmark.enable
+});
+
+document.addEventListener('pjax:success', () => {
+  pjax.executeScripts(document.querySelectorAll('script[data-pjax], .pjax script'));
+  NexT.boot.refresh();
+  // Define Motion Sequence & Bootstrap Motion.
+  if (CONFIG.motion.enable) {
+    NexT.motion.integrator
+      .init()
+      .add(NexT.motion.middleWares.subMenu)
+      .add(NexT.motion.middleWares.postList)
+      .bootstrap();
+  }
+  const hasTOC = document.querySelector('.post-toc');
+  document.querySelector('.sidebar-inner').classList.toggle('sidebar-nav-active', hasTOC);
+  document.querySelector(hasTOC ? '.sidebar-nav-toc' : '.sidebar-nav-overview').click();
+  NexT.utils.updateSidebarPosition();
+});
+</script>
+
+
+  
+
+
+
+
+
+
+  <script>
+    NProgress.configure({
+      showSpinner: false
+    });
+    NProgress.start();
+    document.addEventListener('readystatechange', () => {
+      if (document.readyState === 'interactive') {
+        NProgress.inc(0.8);
+      }
+      if (document.readyState === 'complete') {
+        NProgress.done();
+      }
+    });
+    document.addEventListener('pjax:send', () => {
+      NProgress.start();
+    });
+    document.addEventListener('pjax:success', () => {
+      NProgress.done();
+    });
+  </script>
+
+  
+
+
+
+
+    <div class="pjax">
+
+
+    </div>
+</body>
+</html>
